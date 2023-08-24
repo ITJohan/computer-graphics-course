@@ -54,25 +54,21 @@ function composite(bgImage, fgImage, fgOpacity, fgPosition) {
           fgImage.data[foregroundIndex + 3]
         );
 
-        const alphaResult =
-          foregroundColor.a + backgroundColor.a * (1 - foregroundColor.a);
+        const normalizedForegroundAlpha = foregroundColor.a / 255;
+
         const redResult =
-          (foregroundColor.r * foregroundColor.a +
-            backgroundColor.r * backgroundColor.a * (1 - foregroundColor.a)) /
-          alphaResult;
+          normalizedForegroundAlpha * foregroundColor.r +
+          (1 - normalizedForegroundAlpha) * backgroundColor.r;
         const greenResult =
-          (foregroundColor.g * foregroundColor.a +
-            backgroundColor.g * backgroundColor.a * (1 - foregroundColor.a)) /
-          alphaResult;
+          normalizedForegroundAlpha * foregroundColor.g +
+          (1 - normalizedForegroundAlpha) * backgroundColor.g;
         const blueResult =
-          (foregroundColor.b * foregroundColor.a +
-            backgroundColor.b * backgroundColor.a * (1 - foregroundColor.a)) /
-          alphaResult;
+          normalizedForegroundAlpha * foregroundColor.b +
+          (1 - normalizedForegroundAlpha) * backgroundColor.b;
 
         bgImage.data[backgroundIndex] = redResult;
         bgImage.data[backgroundIndex + 1] = greenResult;
         bgImage.data[backgroundIndex + 2] = blueResult;
-        bgImage.data[backgroundIndex + 3] = alphaResult;
       }
     }
   }
