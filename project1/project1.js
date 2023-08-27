@@ -24,7 +24,6 @@ class Color {
 function composite(bgImage, fgImage, fgOpacity, fgPosition) {
   const fgPosXEnd = fgPosition.x + fgImage.width;
   const fgPosYEnd = fgPosition.y + fgImage.height;
-  const bgOpacity = 1 - fgOpacity;
 
   for (let y = 0; y < bgImage.height; y++) {
     for (let x = 0; x < bgImage.width; x++) {
@@ -54,21 +53,38 @@ function composite(bgImage, fgImage, fgOpacity, fgPosition) {
           fgImage.data[foregroundIndex + 3]
         );
 
-        const normalizedForegroundAlpha = foregroundColor.a / 255;
+        const normalizedForegroundAlpha = (foregroundColor.a / 255) * fgOpacity;
+        const normalizedBackgroundAlpha = backgroundColor.a / 255;
 
-        const redResult =
-          normalizedForegroundAlpha * foregroundColor.r +
-          (1 - normalizedForegroundAlpha) * backgroundColor.r;
-        const greenResult =
-          normalizedForegroundAlpha * foregroundColor.g +
-          (1 - normalizedForegroundAlpha) * backgroundColor.g;
-        const blueResult =
-          normalizedForegroundAlpha * foregroundColor.b +
-          (1 - normalizedForegroundAlpha) * backgroundColor.b;
+        const normalizedAlphaResult =
+          normalizedForegroundAlpha +
+          (1 - normalizedForegroundAlpha) * normalizedBackgroundAlpha;
 
-        bgImage.data[backgroundIndex] = redResult;
-        bgImage.data[backgroundIndex + 1] = greenResult;
-        bgImage.data[backgroundIndex + 2] = blueResult;
+        if (normalizedAlphaResult !== 0) {
+          const redResult =
+            (normalizedForegroundAlpha * foregroundColor.r +
+              (1 - normalizedForegroundAlpha) *
+                normalizedBackgroundAlpha *
+                backgroundColor.r) /
+            normalizedAlphaResult;
+          const greenResult =
+            (normalizedForegroundAlpha * foregroundColor.g +
+              (1 - normalizedForegroundAlpha) *
+                normalizedBackgroundAlpha *
+                backgroundColor.g) /
+            normalizedAlphaResult;
+          const blueResult =
+            (normalizedForegroundAlpha * foregroundColor.b +
+              (1 - normalizedForegroundAlpha) *
+                normalizedBackgroundAlpha *
+                backgroundColor.b) /
+            normalizedAlphaResult;
+
+          bgImage.data[backgroundIndex] = redResult;
+          bgImage.data[backgroundIndex + 1] = greenResult;
+          bgImage.data[backgroundIndex + 2] = blueResult;
+          bgImage.data[backgroundIndex + 3] = normalizedAlphaResult * 255;
+        }
       }
     }
   }
