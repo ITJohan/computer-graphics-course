@@ -1,5 +1,33 @@
 // @ts-check
 
+class Matrix {
+  /**
+   * a d g
+   * b e h
+   * c f i
+   * @param {number} a
+   * @param {number} b
+   * @param {number} c
+   * @param {number} d
+   * @param {number} e
+   * @param {number} f
+   * @param {number} g
+   * @param {number} h
+   * @param {number} i
+   */
+  constructor(a, b, c, d, e, f, g, h, i) {
+    this.a = a;
+    this.b = b;
+    this.c = c;
+    this.d = d;
+    this.e = e;
+    this.f = f;
+    this.g = g;
+    this.h = h;
+    this.i = i;
+  }
+}
+
 /**
  * Returns a 3x3 transformation matrix as an array of 9 values in column-major order.
  * The transformation first applies scale, then rotation, and finally translation.
