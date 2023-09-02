@@ -95,3 +95,51 @@ export const multiplyMatrixWithVector = (matrix, vector) => {
 
   return new Vector(p1Prime, p2Prime, p3Prime);
 };
+
+/**
+ * @param {Matrix} matrixA
+ * @param {Matrix} matrixB
+ * @returns {Matrix}
+ */
+export const multiplyMatrixWithMatrix = (matrixA, matrixB) => {
+  const p11 =
+    matrixA.p11 * matrixB.p11 +
+    matrixA.p12 * matrixB.p21 +
+    matrixA.p13 * matrixB.p31;
+  const p12 =
+    matrixA.p11 * matrixB.p12 +
+    matrixA.p12 * matrixB.p22 +
+    matrixA.p13 * matrixB.p32;
+  const p13 =
+    matrixA.p11 * matrixB.p13 +
+    matrixA.p12 * matrixB.p23 +
+    matrixA.p13 * matrixB.p33;
+
+  const p21 =
+    matrixA.p21 * matrixB.p11 +
+    matrixA.p22 * matrixB.p21 +
+    matrixA.p23 * matrixB.p31;
+  const p22 =
+    matrixA.p21 * matrixB.p12 +
+    matrixA.p22 * matrixB.p22 +
+    matrixA.p23 * matrixB.p32;
+  const p23 =
+    matrixA.p21 * matrixB.p13 +
+    matrixA.p22 * matrixB.p23 +
+    matrixA.p23 * matrixB.p33;
+
+  const p31 =
+    matrixA.p31 * matrixB.p11 +
+    matrixA.p32 * matrixB.p21 +
+    matrixA.p33 * matrixB.p31;
+  const p32 =
+    matrixA.p31 * matrixB.p12 +
+    matrixA.p32 * matrixB.p22 +
+    matrixA.p33 * matrixB.p32;
+  const p33 =
+    matrixA.p31 * matrixB.p13 +
+    matrixA.p32 * matrixB.p23 +
+    matrixA.p33 * matrixB.p33;
+
+  return new Matrix(p11, p12, p13, p21, p22, p23, p31, p32, p33);
+};
