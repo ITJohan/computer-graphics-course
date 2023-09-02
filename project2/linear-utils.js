@@ -1,6 +1,6 @@
 // @ts-check
 
-class Vector {
+export class Vector {
   /**
    * @param {number} p1
    * @param {number} p2
@@ -13,7 +13,7 @@ class Vector {
   }
 }
 
-class Matrix {
+export class Matrix {
   /**
    * p11 p12 p13
    * p21 p22 p23
