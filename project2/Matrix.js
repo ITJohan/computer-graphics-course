@@ -1,3 +1,5 @@
+// @ts-check
+
 import Vector from './Vector.js';
 
 class Matrix {

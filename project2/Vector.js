@@ -1,3 +1,5 @@
+// @ts-check
+
 class Vector {
   /**
    * @param {number} p1
