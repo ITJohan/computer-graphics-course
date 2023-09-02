@@ -39,6 +39,21 @@ class Matrix {
     this.h = h;
     this.i = i;
   }
+
+  /**
+   * @param {Vector} vector
+   * @returns {Vector}
+   */
+  multiplyVector(vector) {
+    const p1Prime =
+      vector.p1 * this.a + vector.p2 * this.d + vector.p3 * this.g;
+    const p2Prime =
+      vector.p1 * this.b + vector.p2 * this.e + vector.p3 * this.h;
+    const p3Prime =
+      vector.p1 * this.c + vector.p2 * this.f + vector.p3 * this.i;
+
+    return new Vector(p1Prime, p2Prime, p3Prime);
+  }
 }
 
 class ScaleMatrix {
@@ -54,8 +69,6 @@ class ScaleMatrix {
     this.#matrix.a = s1;
     this.#matrix.e = s2;
   }
-
-  scale(point) {}
 }
 
 class RotationMatrix {
