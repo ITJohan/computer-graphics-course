@@ -15,37 +15,29 @@ class Vector {
 
 class Matrix {
   /**
-   * a d g
-   * b e h
-   * c f i
-   * @param {number} a
-   * @param {number} b
-   * @param {number} c
-   * @param {number} d
-   * @param {number} e
-   * @param {number} f
-   * @param {number} g
-   * @param {number} h
-   * @param {number} i
+   * p11 p12 p13
+   * p21 p22 p23
+   * p31 p32 p33
+   * @param {number} p11
+   * @param {number} p21
+   * @param {number} p31
+   * @param {number} p12
+   * @param {number} p22
+   * @param {number} p32
+   * @param {number} p13
+   * @param {number} p23
+   * @param {number} p33
    */
-  constructor(a, b, c, d, e, f, g, h, i) {
-    this.a = a;
-    this.b = b;
-    this.c = c;
-    this.d = d;
-    this.e = e;
-    this.f = f;
-    this.g = g;
-    this.h = h;
-    this.i = i;
-  }
-
-  /**
-   * this * matrix
-   * @param {Matrix} matrix
-   */
-  multiplyMatrix(matrix) {
-    const aPrime = matrix.a * this.a + matrix.d * this.b + matrix.g + this.c;
+  constructor(p11, p21, p31, p12, p22, p32, p13, p23, p33) {
+    this.p11 = p11;
+    this.p21 = p21;
+    this.p31 = p31;
+    this.p12 = p12;
+    this.p22 = p22;
+    this.p32 = p32;
+    this.p13 = p13;
+    this.p23 = p23;
+    this.p33 = p33;
   }
 }
 
@@ -59,8 +51,8 @@ class ScaleMatrix {
   constructor(s1, s2) {
     this.s1 = s1;
     this.s2 = s2;
-    this.#matrix.a = s1;
-    this.#matrix.e = s2;
+    this.#matrix.p11 = s1;
+    this.#matrix.p22 = s2;
   }
 }
 
@@ -81,10 +73,10 @@ class RotationMatrix {
   }
 
   #setMatrix(radians) {
-    this.#matrix.a = Math.cos(radians);
-    this.#matrix.b = -Math.sin(radians);
-    this.#matrix.d = Math.sin(radians);
-    this.#matrix.e = Math.cos(radians);
+    this.#matrix.p11 = Math.cos(radians);
+    this.#matrix.p21 = -Math.sin(radians);
+    this.#matrix.p12 = Math.sin(radians);
+    this.#matrix.p22 = Math.cos(radians);
   }
 }
 
@@ -95,11 +87,11 @@ class RotationMatrix {
  */
 export const multiplyMatrixWithVector = (matrix, vector) => {
   const p1Prime =
-    vector.p1 * matrix.a + vector.p2 * matrix.d + vector.p3 * matrix.g;
+    vector.p1 * matrix.p11 + vector.p2 * matrix.p12 + vector.p3 * matrix.p13;
   const p2Prime =
-    vector.p1 * matrix.b + vector.p2 * matrix.e + vector.p3 * matrix.h;
+    vector.p1 * matrix.p21 + vector.p2 * matrix.p22 + vector.p3 * matrix.p23;
   const p3Prime =
-    vector.p1 * matrix.c + vector.p2 * matrix.f + vector.p3 * matrix.i;
+    vector.p1 * matrix.p31 + vector.p2 * matrix.p32 + vector.p3 * matrix.p33;
 
   return new Vector(p1Prime, p2Prime, p3Prime);
 };
