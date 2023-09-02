@@ -32,14 +32,14 @@ class Matrix {
    * @returns {Vector}
    */
   multiplyWithVector(vector) {
-    const p1Prime =
+    const p1 =
       vector.p1 * this.p11 + vector.p2 * this.p12 + vector.p3 * this.p13;
-    const p2Prime =
+    const p2 =
       vector.p1 * this.p21 + vector.p2 * this.p22 + vector.p3 * this.p23;
-    const p3Prime =
+    const p3 =
       vector.p1 * this.p31 + vector.p2 * this.p32 + vector.p3 * this.p33;
 
-    return new Vector(p1Prime, p2Prime, p3Prime);
+    return new Vector(p1, p2, p3);
   }
 
   /**
