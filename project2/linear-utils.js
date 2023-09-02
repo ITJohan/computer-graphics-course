@@ -41,21 +41,6 @@ class Matrix {
   }
 
   /**
-   * @param {Vector} vector
-   * @returns {Vector}
-   */
-  multiplyVector(vector) {
-    const p1Prime =
-      vector.p1 * this.a + vector.p2 * this.d + vector.p3 * this.g;
-    const p2Prime =
-      vector.p1 * this.b + vector.p2 * this.e + vector.p3 * this.h;
-    const p3Prime =
-      vector.p1 * this.c + vector.p2 * this.f + vector.p3 * this.i;
-
-    return new Vector(p1Prime, p2Prime, p3Prime);
-  }
-
-  /**
    * this * matrix
    * @param {Matrix} matrix
    */
@@ -102,3 +87,19 @@ class RotationMatrix {
     this.#matrix.e = Math.cos(radians);
   }
 }
+
+/**
+ * @param {Matrix} matrix
+ * @param {Vector} vector
+ * @returns {Vector}
+ */
+export const multiplyMatrixWithVector = (matrix, vector) => {
+  const p1Prime =
+    vector.p1 * matrix.a + vector.p2 * matrix.d + vector.p3 * matrix.g;
+  const p2Prime =
+    vector.p1 * matrix.b + vector.p2 * matrix.e + vector.p3 * matrix.h;
+  const p3Prime =
+    vector.p1 * matrix.c + vector.p2 * matrix.f + vector.p3 * matrix.i;
+
+  return new Vector(p1Prime, p2Prime, p3Prime);
+};
