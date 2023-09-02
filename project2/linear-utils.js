@@ -39,6 +39,50 @@ class Matrix {
     this.p23 = p23;
     this.p33 = p33;
   }
+
+  /**
+   * @param {Vector} vector
+   * @returns {Vector}
+   */
+  multiplyWithVector(vector) {
+    const p1Prime =
+      vector.p1 * this.p11 + vector.p2 * this.p12 + vector.p3 * this.p13;
+    const p2Prime =
+      vector.p1 * this.p21 + vector.p2 * this.p22 + vector.p3 * this.p23;
+    const p3Prime =
+      vector.p1 * this.p31 + vector.p2 * this.p32 + vector.p3 * this.p33;
+
+    return new Vector(p1Prime, p2Prime, p3Prime);
+  }
+
+  /**
+   * @param {Matrix} matrix
+   * @returns {Matrix}
+   */
+  multiplyWithMatrix(matrix) {
+    const p11 =
+      this.p11 * matrix.p11 + this.p12 * matrix.p21 + this.p13 * matrix.p31;
+    const p12 =
+      this.p11 * matrix.p12 + this.p12 * matrix.p22 + this.p13 * matrix.p32;
+    const p13 =
+      this.p11 * matrix.p13 + this.p12 * matrix.p23 + this.p13 * matrix.p33;
+
+    const p21 =
+      this.p21 * matrix.p11 + this.p22 * matrix.p21 + this.p23 * matrix.p31;
+    const p22 =
+      this.p21 * matrix.p12 + this.p22 * matrix.p22 + this.p23 * matrix.p32;
+    const p23 =
+      this.p21 * matrix.p13 + this.p22 * matrix.p23 + this.p23 * matrix.p33;
+
+    const p31 =
+      this.p31 * matrix.p11 + this.p32 * matrix.p21 + this.p33 * matrix.p31;
+    const p32 =
+      this.p31 * matrix.p12 + this.p32 * matrix.p22 + this.p33 * matrix.p32;
+    const p33 =
+      this.p31 * matrix.p13 + this.p32 * matrix.p23 + this.p33 * matrix.p33;
+
+    return new Matrix(p11, p12, p13, p21, p22, p23, p31, p32, p33);
+  }
 }
 
 class ScaleMatrix {
@@ -79,67 +123,3 @@ class RotationMatrix {
     this.#matrix.p22 = Math.cos(radians);
   }
 }
-
-/**
- * @param {Matrix} matrix
- * @param {Vector} vector
- * @returns {Vector}
- */
-export const multiplyMatrixWithVector = (matrix, vector) => {
-  const p1Prime =
-    vector.p1 * matrix.p11 + vector.p2 * matrix.p12 + vector.p3 * matrix.p13;
-  const p2Prime =
-    vector.p1 * matrix.p21 + vector.p2 * matrix.p22 + vector.p3 * matrix.p23;
-  const p3Prime =
-    vector.p1 * matrix.p31 + vector.p2 * matrix.p32 + vector.p3 * matrix.p33;
-
-  return new Vector(p1Prime, p2Prime, p3Prime);
-};
-
-/**
- * @param {Matrix} matrixA
- * @param {Matrix} matrixB
- * @returns {Matrix}
- */
-export const multiplyMatrixWithMatrix = (matrixA, matrixB) => {
-  const p11 =
-    matrixA.p11 * matrixB.p11 +
-    matrixA.p12 * matrixB.p21 +
-    matrixA.p13 * matrixB.p31;
-  const p12 =
-    matrixA.p11 * matrixB.p12 +
-    matrixA.p12 * matrixB.p22 +
-    matrixA.p13 * matrixB.p32;
-  const p13 =
-    matrixA.p11 * matrixB.p13 +
-    matrixA.p12 * matrixB.p23 +
-    matrixA.p13 * matrixB.p33;
-
-  const p21 =
-    matrixA.p21 * matrixB.p11 +
-    matrixA.p22 * matrixB.p21 +
-    matrixA.p23 * matrixB.p31;
-  const p22 =
-    matrixA.p21 * matrixB.p12 +
-    matrixA.p22 * matrixB.p22 +
-    matrixA.p23 * matrixB.p32;
-  const p23 =
-    matrixA.p21 * matrixB.p13 +
-    matrixA.p22 * matrixB.p23 +
-    matrixA.p23 * matrixB.p33;
-
-  const p31 =
-    matrixA.p31 * matrixB.p11 +
-    matrixA.p32 * matrixB.p21 +
-    matrixA.p33 * matrixB.p31;
-  const p32 =
-    matrixA.p31 * matrixB.p12 +
-    matrixA.p32 * matrixB.p22 +
-    matrixA.p33 * matrixB.p32;
-  const p33 =
-    matrixA.p31 * matrixB.p13 +
-    matrixA.p32 * matrixB.p23 +
-    matrixA.p33 * matrixB.p33;
-
-  return new Matrix(p11, p12, p13, p21, p22, p23, p31, p32, p33);
-};
