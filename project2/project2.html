@@ -4,8 +4,10 @@
 
 	<head>
 		<title>CS 4600 - Project 2</title>
-		<script type="text/javascript" id="includedscript" src="project2.js" type="module"></script>
-		<script type="text/javascript" type="module">
+		<script id="includedscript" src="project2.js" type="module"></script>
+		<script type="module">
+			import { GetTransform, ApplyTransform } from './project2.js'
+
 			var uav = {
 				positionX: 0,
 				positionY: 0,
@@ -89,6 +91,10 @@
 				if (ground.positionY > sy) ground.positionY -= sy;
 				UpdateTrans();
 			}, 15);
+
+			const body = document.querySelector('body')
+
+			body.addEventListener('mousemove', e => MoveUAV())
 		</script>
 		<style>
 			html {
@@ -152,7 +158,7 @@
 		</style>
 	</head>
 
-	<body onMouseMove="MoveUAV()">
+	<body>
 		<img id="shadow" src="shadow.png" />
 		<img id="uav" src="uav.png" />
 		<img id="propeller0" class="propeller" src="propeller.png" />
