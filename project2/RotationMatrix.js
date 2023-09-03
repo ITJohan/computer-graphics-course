@@ -19,7 +19,6 @@ class RotationMatrix extends Matrix {
       0,
       1
     );
-    this.degrees = degrees;
   }
 
   set degrees(degrees) {
@@ -28,7 +27,6 @@ class RotationMatrix extends Matrix {
     this.p21 = -Math.sin(radians);
     this.p12 = Math.sin(radians);
     this.p22 = Math.cos(radians);
-    this.degrees = degrees;
   }
 }
 
