@@ -51,26 +51,26 @@ class Matrix {
   multiplyWithMatrix(matrix) {
     const p11 =
       this.p11 * matrix.p11 + this.p12 * matrix.p21 + this.p13 * matrix.p31;
-    const p12 =
-      this.p11 * matrix.p12 + this.p12 * matrix.p22 + this.p13 * matrix.p32;
-    const p13 =
-      this.p11 * matrix.p13 + this.p12 * matrix.p23 + this.p13 * matrix.p33;
-
     const p21 =
       this.p21 * matrix.p11 + this.p22 * matrix.p21 + this.p23 * matrix.p31;
-    const p22 =
-      this.p21 * matrix.p12 + this.p22 * matrix.p22 + this.p23 * matrix.p32;
-    const p23 =
-      this.p21 * matrix.p13 + this.p22 * matrix.p23 + this.p23 * matrix.p33;
-
     const p31 =
       this.p31 * matrix.p11 + this.p32 * matrix.p21 + this.p33 * matrix.p31;
+
+    const p12 =
+      this.p11 * matrix.p12 + this.p12 * matrix.p22 + this.p13 * matrix.p32;
+    const p22 =
+      this.p21 * matrix.p12 + this.p22 * matrix.p22 + this.p23 * matrix.p32;
     const p32 =
       this.p31 * matrix.p12 + this.p32 * matrix.p22 + this.p33 * matrix.p32;
+
+    const p13 =
+      this.p11 * matrix.p13 + this.p12 * matrix.p23 + this.p13 * matrix.p33;
+    const p23 =
+      this.p21 * matrix.p13 + this.p22 * matrix.p23 + this.p23 * matrix.p33;
     const p33 =
       this.p31 * matrix.p13 + this.p32 * matrix.p23 + this.p33 * matrix.p33;
 
-    return new Matrix(p11, p12, p13, p21, p22, p23, p31, p32, p33);
+    return new Matrix(p11, p21, p31, p12, p22, p32, p13, p23, p33);
   }
 }
 

@@ -10,9 +10,9 @@ class RotationMatrix extends Matrix {
     const radians = degrees * (Math.PI / 180);
     super(
       Math.cos(radians),
-      -Math.sin(radians),
-      0,
       Math.sin(radians),
+      0,
+      -Math.sin(radians),
       Math.cos(radians),
       0,
       0,
@@ -24,8 +24,8 @@ class RotationMatrix extends Matrix {
   set degrees(degrees) {
     const radians = degrees * (Math.PI / 180);
     this.p11 = Math.cos(radians);
-    this.p21 = -Math.sin(radians);
-    this.p12 = Math.sin(radians);
+    this.p21 = Math.sin(radians);
+    this.p12 = -Math.sin(radians);
     this.p22 = Math.cos(radians);
   }
 }

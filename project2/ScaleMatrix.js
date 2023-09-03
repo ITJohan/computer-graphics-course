@@ -8,7 +8,7 @@ class ScaleMatrix extends Matrix {
    * @param {number} s2
    */
   constructor(s1, s2) {
-    super(s1, 0, 0, 0, s2, 0, 0, 0, 0);
+    super(s1, 0, 0, 0, s2, 0, 0, 0, 1);
   }
 }
 
