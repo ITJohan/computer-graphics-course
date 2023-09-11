@@ -5,6 +5,12 @@ class CurveDrawer {
     this.prog = InitShaderProgram(curvesVS, curvesFS);
     // [TO-DO] Other initializations should be done here.
     // [TO-DO] This is a good place to get the locations of attributes and uniform variables.
+    this.t = gl.getAttribLocation(this.prog, 't');
+    this.mvp = gl.getUniformLocation(this.prog, 'mvp');
+    this.p0 = gl.getUniformLocation(this.prog, 'p0');
+    this.p1 = gl.getUniformLocation(this.prog, 'p1');
+    this.p2 = gl.getUniformLocation(this.prog, 'p2');
+    this.p3 = gl.getUniformLocation(this.prog, 'p3');
 
     // Initialize the attribute buffer
     this.steps = 100;
