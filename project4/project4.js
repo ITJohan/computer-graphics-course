@@ -35,9 +35,14 @@ function GetModelViewProjection( projectionMatrix, translationX, translationY, t
 const meshVS = `
 	attribute vec3 pos;
 	uniform mat4 mvp;
+	uniform bool swap;
 	void main()
 	{
-		gl_Position = mvp * vec4(pos,1);
+		if (swap) {
+			gl_Position = mvp * vec4(pos.xzy, 1);
+		} else {
+			gl_Position = mvp * vec4(pos, 1);
+		}
 	}
 `
 
@@ -57,6 +62,7 @@ class MeshDrawer
 		// [TO-DO] initializations
 		this.prog = InitShaderProgram(meshVS, meshFS);
 		this.mvp = gl.getUniformLocation(this.prog, 'mvp');
+		this.swapPos = gl.getUniformLocation(this.prog, 'swap')
 		this.vertPos = gl.getAttribLocation(this.prog, 'pos');
 		this.vertBuffer = gl.createBuffer();
 	}
@@ -86,6 +92,9 @@ class MeshDrawer
 	swapYZ( swap )
 	{
 		// [TO-DO] Set the uniform parameter(s) of the vertex shader
+		gl.useProgram(this.prog)
+		gl.uniform1i(this.swapPos, swap ? 1 : 0);
+
 	}
 	
 	// This method is called to draw the triangular mesh.
