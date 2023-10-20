@@ -52,11 +52,15 @@ const meshVS = `
 const meshFS = `
 	precision mediump float;
 	uniform sampler2D tex;
+	uniform bool showTex;
 	varying vec2 texCoord;
 	void main()
 	{
-		// gl_FragColor = vec4(1,gl_FragCoord.z*gl_FragCoord.z,0,1);
-		gl_FragColor = texture2D(tex, texCoord);
+		if (showTex) {
+			gl_FragColor = texture2D(tex, texCoord);
+		} else {
+			gl_FragColor = vec4(1,gl_FragCoord.z*gl_FragCoord.z,0,1);
+		}
 	}
 `
 
@@ -69,12 +73,17 @@ class MeshDrawer
 		this.prog = InitShaderProgram(meshVS, meshFS);
 		this.mvp = gl.getUniformLocation(this.prog, 'mvp');
 		this.swapPos = gl.getUniformLocation(this.prog, 'swap')
+		this.showTexPos = gl.getUniformLocation(this.prog, 'showTex')
 		this.texPos = gl.getUniformLocation(this.prog, 'tex')
 		this.vertPos = gl.getAttribLocation(this.prog, 'pos');
 		this.txcPos = gl.getAttribLocation(this.prog, 'txc');
+
+		// Buffers
 		this.vertBuffer = gl.createBuffer();
 		this.txcBuffer = gl.createBuffer();
 		this.texture = gl.createTexture();
+
+		this.showTexture(false);
 	}
 	
 	// This method is called every time the user opens an OBJ file.
@@ -107,7 +116,6 @@ class MeshDrawer
 		// [TO-DO] Set the uniform parameter(s) of the vertex shader
 		gl.useProgram(this.prog)
 		gl.uniform1i(this.swapPos, swap ? 1 : 0);
-
 	}
 	
 	// This method is called to draw the triangular mesh.
@@ -150,6 +158,8 @@ class MeshDrawer
 		// some uniform parameter(s) of the fragment shader, so that it uses the texture.
 		gl.useProgram(this.prog);
 		gl.uniform1i(this.texPos, 0);
+
+		this.showTexture(true);
 	}
 	
 	// This method is called when the user changes the state of the
@@ -158,6 +168,7 @@ class MeshDrawer
 	showTexture( show )
 	{
 		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify if it should use the texture.
+		gl.useProgram(this.prog)
+		gl.uniform1i(this.showTexPos, show ? 1 : 0);
 	}
-	
 }
