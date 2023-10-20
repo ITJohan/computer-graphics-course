@@ -34,8 +34,10 @@ function GetModelViewProjection( projectionMatrix, translationX, translationY, t
 // [TO-DO] Complete the implementation of the following class.
 const meshVS = `
 	attribute vec3 pos;
+	attribute vec2 txc;
 	uniform mat4 mvp;
 	uniform bool swap;
+	varying vec2 texCoord;
 	void main()
 	{
 		if (swap) {
@@ -43,14 +45,18 @@ const meshVS = `
 		} else {
 			gl_Position = mvp * vec4(pos, 1);
 		}
+		texCoord = txc;
 	}
 `
 
 const meshFS = `
 	precision mediump float;
+	uniform sampler2D tex;
+	varying vec2 texCoord;
 	void main()
 	{
-		gl_FragColor = vec4(1,gl_FragCoord.z*gl_FragCoord.z,0,1);
+		// gl_FragColor = vec4(1,gl_FragCoord.z*gl_FragCoord.z,0,1);
+		gl_FragColor = texture2D(tex, texCoord);
 	}
 `
 
@@ -63,8 +69,12 @@ class MeshDrawer
 		this.prog = InitShaderProgram(meshVS, meshFS);
 		this.mvp = gl.getUniformLocation(this.prog, 'mvp');
 		this.swapPos = gl.getUniformLocation(this.prog, 'swap')
+		this.texPos = gl.getUniformLocation(this.prog, 'tex')
 		this.vertPos = gl.getAttribLocation(this.prog, 'pos');
+		this.txcPos = gl.getAttribLocation(this.prog, 'txc');
 		this.vertBuffer = gl.createBuffer();
+		this.txcBuffer = gl.createBuffer();
+		this.texture = gl.createTexture();
 	}
 	
 	// This method is called every time the user opens an OBJ file.
@@ -84,6 +94,9 @@ class MeshDrawer
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertPos), gl.STATIC_DRAW);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.txcBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
 	}
 	
 	// This method is called when the user changes the state of the
@@ -105,9 +118,15 @@ class MeshDrawer
 		// [TO-DO] Complete the WebGL initializations before drawing
 		gl.useProgram(this.prog);
 		gl.uniformMatrix4fv(this.mvp, false, trans);
+
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
 		gl.vertexAttribPointer(this.vertPos, 3, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray(this.vertPos);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.txcBuffer);
+		gl.vertexAttribPointer(this.txcPos, 2, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(this.txcPos);
+
 		gl.drawArrays( gl.TRIANGLES, 0, this.numTriangles );
 	}
 	
@@ -116,12 +135,21 @@ class MeshDrawer
 	setTexture( img )
 	{
 		// [TO-DO] Bind the texture
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
 		// You can set the texture image data using the following command.
 		gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img );
+		gl.generateMipmap(gl.TEXTURE_2D);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
 
 		// [TO-DO] Now that we have a texture, it might be a good idea to set
 		// some uniform parameter(s) of the fragment shader, so that it uses the texture.
+		gl.useProgram(this.prog);
+		gl.uniform1i(this.texPos, 0);
 	}
 	
 	// This method is called when the user changes the state of the
