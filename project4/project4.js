@@ -32,6 +32,22 @@ function GetModelViewProjection( projectionMatrix, translationX, translationY, t
 
 
 // [TO-DO] Complete the implementation of the following class.
+const meshVS = `
+	attribute vec3 pos;
+	uniform mat4 mvp;
+	void main()
+	{
+		gl_Position = mvp * vec4(pos,1);
+	}
+`
+
+const meshFS = `
+	precision mediump float;
+	void main()
+	{
+		gl_FragColor = vec4(1,gl_FragCoord.z*gl_FragCoord.z,0,1);
+	}
+`
 
 class MeshDrawer
 {
@@ -39,6 +55,10 @@ class MeshDrawer
 	constructor()
 	{
 		// [TO-DO] initializations
+		this.prog = InitShaderProgram(meshVS, meshFS);
+		this.mvp = gl.getUniformLocation(this.prog, 'mvp');
+		this.vertPos = gl.getAttribLocation(this.prog, 'pos');
+		this.vertBuffer = gl.createBuffer();
 	}
 	
 	// This method is called every time the user opens an OBJ file.
@@ -55,6 +75,9 @@ class MeshDrawer
 	{
 		// [TO-DO] Update the contents of the vertex buffer objects.
 		this.numTriangles = vertPos.length / 3;
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertPos), gl.STATIC_DRAW);
 	}
 	
 	// This method is called when the user changes the state of the
@@ -71,7 +94,11 @@ class MeshDrawer
 	draw( trans )
 	{
 		// [TO-DO] Complete the WebGL initializations before drawing
-
+		gl.useProgram(this.prog);
+		gl.uniformMatrix4fv(this.mvp, false, trans);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
+		gl.vertexAttribPointer(this.vertPos, 3, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(this.vertPos);
 		gl.drawArrays( gl.TRIANGLES, 0, this.numTriangles );
 	}
 	
