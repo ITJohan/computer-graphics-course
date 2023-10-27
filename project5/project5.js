@@ -34,13 +34,14 @@ function GetModelViewMatrix( translationX, translationY, translationZ, rotationX
 const meshVS = `
 	attribute vec3 pos;
 	attribute vec2 txc;
+	attribute vec3 normal;
 	uniform mat4 mvp;
 	uniform bool swap;
 	varying vec2 texCoord;
 	void main()
 	{
 		if (swap) {
-			gl_Position = mvp * vec4(pos.xzy, 1);
+			gl_Position = mvp * vec4(pos.xzy, 1) * vec4(normal, 1);
 		} else {
 			gl_Position = mvp * vec4(pos, 1);
 		}
@@ -76,10 +77,12 @@ class MeshDrawer
 		this.texPos = gl.getUniformLocation(this.prog, 'tex')
 		this.vertPos = gl.getAttribLocation(this.prog, 'pos');
 		this.txcPos = gl.getAttribLocation(this.prog, 'txc');
+		this.normalPos = gl.getAttribLocation(this.prog, 'normal');
 
 		// Buffers
 		this.vertBuffer = gl.createBuffer();
 		this.txcBuffer = gl.createBuffer();
+		this.normalBuffer = gl.createBuffer();
 		this.texture = gl.createTexture();
 
 		this.showTexture(false);
@@ -106,6 +109,9 @@ class MeshDrawer
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.txcBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
 	}
 	
 	// This method is called when the user changes the state of the
@@ -136,6 +142,10 @@ class MeshDrawer
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.txcBuffer);
 		gl.vertexAttribPointer(this.txcPos, 2, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray(this.txcPos);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+		gl.vertexAttribPointer(this.normalPos, 3, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(this.normalPos);
 
 		gl.drawArrays( gl.TRIANGLES, 0, this.numTriangles );
 	}
