@@ -24,9 +24,9 @@ function GetModelViewMatrix( translationX, translationY, translationZ, rotationX
 		0, 0, 1, 0,
 		translationX, translationY, translationZ, 1
 	];
-	var mvp = MatrixMult( projectionMatrix, MatrixMult(translationMatrix, rotationMatrix) );
+	var mv = MatrixMult(translationMatrix, rotationMatrix);
 
-	return mvp;
+	return mv;
 }
 
 
@@ -127,7 +127,7 @@ class MeshDrawer
 	{
 		// [TO-DO] Complete the WebGL initializations before drawing
 		gl.useProgram(this.prog);
-		gl.uniformMatrix4fv(this.mvp, false, trans);
+		gl.uniformMatrix4fv(this.mvp, false, matrixMVP);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
 		gl.vertexAttribPointer(this.vertPos, 3, gl.FLOAT, false, 0, 0);
