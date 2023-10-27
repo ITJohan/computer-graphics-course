@@ -5,18 +5,63 @@
 function GetModelViewMatrix( translationX, translationY, translationZ, rotationX, rotationY )
 {
 	// [TO-DO] Modify the code below to form the transformation matrix.
-	var trans = [
+	const rotationMatrixX = [
+		1, 										0, 									 0, 0,
+		0, 	Math.cos(rotationX), Math.sin(rotationX), 0,
+		0, -Math.sin(rotationX), Math.cos(rotationX), 0,
+		0,										0, 									 0, 1
+	];
+	const rotationMatrixY = [
+		Math.cos(rotationY), 0, -Math.sin(rotationY), 0,
+		0, 									 1, 									 0, 0,
+		Math.sin(rotationY), 0,  Math.cos(rotationY), 0,
+		0,									 0, 									 0, 1
+	];
+	const rotationMatrix = MatrixMult(rotationMatrixY, rotationMatrixX)
+	var translationMatrix = [
 		1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, 1, 0,
 		translationX, translationY, translationZ, 1
 	];
-	var mv = trans;
-	return mv;
+	var mvp = MatrixMult( projectionMatrix, MatrixMult(translationMatrix, rotationMatrix) );
+
+	return mvp;
 }
 
 
 // [TO-DO] Complete the implementation of the following class.
+const meshVS = `
+	attribute vec3 pos;
+	attribute vec2 txc;
+	uniform mat4 mvp;
+	uniform bool swap;
+	varying vec2 texCoord;
+	void main()
+	{
+		if (swap) {
+			gl_Position = mvp * vec4(pos.xzy, 1);
+		} else {
+			gl_Position = mvp * vec4(pos, 1);
+		}
+		texCoord = txc;
+	}
+`
+
+const meshFS = `
+	precision mediump float;
+	uniform sampler2D tex;
+	uniform bool showTex;
+	varying vec2 texCoord;
+	void main()
+	{
+		if (showTex) {
+			gl_FragColor = texture2D(tex, texCoord);
+		} else {
+			gl_FragColor = vec4(1,gl_FragCoord.z*gl_FragCoord.z,0,1);
+		}
+	}
+`
 
 class MeshDrawer
 {
@@ -24,6 +69,20 @@ class MeshDrawer
 	constructor()
 	{
 		// [TO-DO] initializations
+		this.prog = InitShaderProgram(meshVS, meshFS);
+		this.mvp = gl.getUniformLocation(this.prog, 'mvp');
+		this.swapPos = gl.getUniformLocation(this.prog, 'swap')
+		this.showTexPos = gl.getUniformLocation(this.prog, 'showTex')
+		this.texPos = gl.getUniformLocation(this.prog, 'tex')
+		this.vertPos = gl.getAttribLocation(this.prog, 'pos');
+		this.txcPos = gl.getAttribLocation(this.prog, 'txc');
+
+		// Buffers
+		this.vertBuffer = gl.createBuffer();
+		this.txcBuffer = gl.createBuffer();
+		this.texture = gl.createTexture();
+
+		this.showTexture(false);
 	}
 	
 	// This method is called every time the user opens an OBJ file.
@@ -41,6 +100,12 @@ class MeshDrawer
 	{
 		// [TO-DO] Update the contents of the vertex buffer objects.
 		this.numTriangles = vertPos.length / 3;
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertPos), gl.STATIC_DRAW);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.txcBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
 	}
 	
 	// This method is called when the user changes the state of the
@@ -49,6 +114,8 @@ class MeshDrawer
 	swapYZ( swap )
 	{
 		// [TO-DO] Set the uniform parameter(s) of the vertex shader
+		gl.useProgram(this.prog)
+		gl.uniform1i(this.swapPos, swap ? 1 : 0);
 	}
 	
 	// This method is called to draw the triangular mesh.
@@ -59,6 +126,16 @@ class MeshDrawer
 	draw( matrixMVP, matrixMV, matrixNormal )
 	{
 		// [TO-DO] Complete the WebGL initializations before drawing
+		gl.useProgram(this.prog);
+		gl.uniformMatrix4fv(this.mvp, false, trans);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
+		gl.vertexAttribPointer(this.vertPos, 3, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(this.vertPos);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.txcBuffer);
+		gl.vertexAttribPointer(this.txcPos, 2, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(this.txcPos);
 
 		gl.drawArrays( gl.TRIANGLES, 0, this.numTriangles );
 	}
@@ -68,12 +145,23 @@ class MeshDrawer
 	setTexture( img )
 	{
 		// [TO-DO] Bind the texture
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
 		// You can set the texture image data using the following command.
 		gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img );
+		gl.generateMipmap(gl.TEXTURE_2D);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
 
 		// [TO-DO] Now that we have a texture, it might be a good idea to set
 		// some uniform parameter(s) of the fragment shader, so that it uses the texture.
+		gl.useProgram(this.prog);
+		gl.uniform1i(this.texPos, 0);
+
+		this.showTexture(true);
 	}
 	
 	// This method is called when the user changes the state of the
@@ -82,6 +170,8 @@ class MeshDrawer
 	showTexture( show )
 	{
 		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify if it should use the texture.
+		gl.useProgram(this.prog)
+		gl.uniform1i(this.showTexPos, show ? 1 : 0);
 	}
 	
 	// This method is called to set the incoming light direction
