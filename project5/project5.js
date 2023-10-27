@@ -38,14 +38,16 @@ const meshVS = `
 	uniform mat4 mvp;
 	uniform bool swap;
 	varying vec2 texCoord;
+	varying vec3 v_normal;
 	void main()
 	{
 		if (swap) {
-			gl_Position = mvp * vec4(pos.xzy, 1) * vec4(normal, 1);
+			gl_Position = mvp * vec4(pos.xzy, 1);
 		} else {
 			gl_Position = mvp * vec4(pos, 1);
 		}
 		texCoord = txc;
+		v_normal = normal;
 	}
 `
 
@@ -54,12 +56,14 @@ const meshFS = `
 	uniform sampler2D tex;
 	uniform bool showTex;
 	varying vec2 texCoord;
+	varying vec3 v_normal;
 	void main()
 	{
+		vec3 normal = normalize(v_normal);
 		if (showTex) {
 			gl_FragColor = texture2D(tex, texCoord);
 		} else {
-			gl_FragColor = vec4(1,gl_FragCoord.z*gl_FragCoord.z,0,1);
+			gl_FragColor = vec4(1,1,1,1);
 		}
 	}
 `
