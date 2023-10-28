@@ -32,39 +32,47 @@ function GetModelViewMatrix( translationX, translationY, translationZ, rotationX
 
 // [TO-DO] Complete the implementation of the following class.
 const meshVS = `
-	attribute vec3 pos;
-	attribute vec2 txc;
-	attribute vec3 normal;
-	uniform mat4 mvp;
-	uniform bool swap;
-	varying vec2 texCoord;
+	attribute vec3 a_position;
+	attribute vec2 a_textureCoordinates;
+	attribute vec3 a_normal;
+
+	uniform mat4 u_matrixMVP;
+	uniform bool u_swap;
+	uniform mat4 u_matrixMV;
+	uniform mat3 u_matrixNormal;
+
+	varying vec2 v_textureCoordinates;
 	varying vec3 v_normal;
+
 	void main()
 	{
-		if (swap) {
-			gl_Position = mvp * vec4(pos.xzy, 1);
+		if (u_swap) {
+			gl_Position = u_matrixMVP * vec4(a_position.xzy, 1);
 		} else {
-			gl_Position = mvp * vec4(pos, 1);
+			gl_Position = u_matrixMVP * vec4(a_position, 1);
 		}
-		texCoord = txc;
-		v_normal = normal;
+		v_textureCoordinates = a_textureCoordinates;
+		v_normal =  a_normal;
 	}
 `
 
 const meshFS = `
 	precision mediump float;
-	uniform sampler2D tex;
-	uniform bool showTex;
-	varying vec2 texCoord;
+
+	uniform sampler2D u_texture;
+	uniform bool u_showTex;
+
+	varying vec2 v_textureCoordinates;
 	varying vec3 v_normal;
+
 	void main()
 	{
 		vec3 normal = normalize(v_normal);
-		if (showTex) {
-			gl_FragColor = texture2D(tex, texCoord);
-		} else {
-			gl_FragColor = vec4(1,1,1,1);
-		}
+		vec3 lightDirection = normalize(vec3(1.0, 1.0, 0.0));
+		vec4 diffuseCoefficient = u_showTex ? texture2D(u_texture, v_textureCoordinates) : vec4(1.0, 1.0, 1.0, 1.0);
+
+		gl_FragColor = diffuseCoefficient;
+		gl_FragColor.rgb *= dot(normal, lightDirection);
 	}
 `
 
@@ -75,17 +83,21 @@ class MeshDrawer
 	{
 		// [TO-DO] initializations
 		this.prog = InitShaderProgram(meshVS, meshFS);
-		this.mvp = gl.getUniformLocation(this.prog, 'mvp');
-		this.swapPos = gl.getUniformLocation(this.prog, 'swap')
-		this.showTexPos = gl.getUniformLocation(this.prog, 'showTex')
-		this.texPos = gl.getUniformLocation(this.prog, 'tex')
-		this.vertPos = gl.getAttribLocation(this.prog, 'pos');
-		this.txcPos = gl.getAttribLocation(this.prog, 'txc');
-		this.normalPos = gl.getAttribLocation(this.prog, 'normal');
+
+		this.matrixMVPLocation = gl.getUniformLocation(this.prog, 'u_matrixMVP');
+		this.matrixMVLocation = gl.getUniformLocation(this.prog, 'u_matrixMV');
+		this.matrixNormalLocation = gl.getUniformLocation(this.prog, 'u_matrixNormal')
+		this.swapLocation = gl.getUniformLocation(this.prog, 'u_swap')
+		this.showTexLocation = gl.getUniformLocation(this.prog, 'u_showTex')
+		this.textureLocation = gl.getUniformLocation(this.prog, 'u_texture')
+
+		this.positionLocation = gl.getAttribLocation(this.prog, 'a_position');
+		this.textureCoordinatesLocation = gl.getAttribLocation(this.prog, 'a_textureCoordinates');
+		this.normalLocation = gl.getAttribLocation(this.prog, 'a_normal');
 
 		// Buffers
-		this.vertBuffer = gl.createBuffer();
-		this.txcBuffer = gl.createBuffer();
+		this.positionBuffer = gl.createBuffer();
+		this.textureCoordinatesBuffer = gl.createBuffer();
 		this.normalBuffer = gl.createBuffer();
 		this.texture = gl.createTexture();
 
@@ -108,10 +120,10 @@ class MeshDrawer
 		// [TO-DO] Update the contents of the vertex buffer objects.
 		this.numTriangles = vertPos.length / 3;
 
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertPos), gl.STATIC_DRAW);
 
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.txcBuffer);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordinatesBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
@@ -125,7 +137,7 @@ class MeshDrawer
 	{
 		// [TO-DO] Set the uniform parameter(s) of the vertex shader
 		gl.useProgram(this.prog)
-		gl.uniform1i(this.swapPos, swap ? 1 : 0);
+		gl.uniform1i(this.swapLocation, swap ? 1 : 0);
 	}
 	
 	// This method is called to draw the triangular mesh.
@@ -137,19 +149,21 @@ class MeshDrawer
 	{
 		// [TO-DO] Complete the WebGL initializations before drawing
 		gl.useProgram(this.prog);
-		gl.uniformMatrix4fv(this.mvp, false, matrixMVP);
+		gl.uniformMatrix4fv(this.matrixMVPLocation, false, matrixMVP);
+		gl.uniformMatrix4fv(this.matrixMVLocation, false, matrixMV);
+		gl.uniformMatrix3fv(this.matrixNormalLocation, false, matrixNormal);
 
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
-		gl.vertexAttribPointer(this.vertPos, 3, gl.FLOAT, false, 0, 0);
-		gl.enableVertexAttribArray(this.vertPos);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+		gl.vertexAttribPointer(this.positionLocation, 3, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(this.positionLocation);
 
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.txcBuffer);
-		gl.vertexAttribPointer(this.txcPos, 2, gl.FLOAT, false, 0, 0);
-		gl.enableVertexAttribArray(this.txcPos);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordinatesBuffer);
+		gl.vertexAttribPointer(this.textureCoordinatesLocation, 2, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(this.textureCoordinatesLocation);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
-		gl.vertexAttribPointer(this.normalPos, 3, gl.FLOAT, false, 0, 0);
-		gl.enableVertexAttribArray(this.normalPos);
+		gl.vertexAttribPointer(this.normalLocation, 3, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(this.normalLocation);
 
 		gl.drawArrays( gl.TRIANGLES, 0, this.numTriangles );
 	}
@@ -173,7 +187,7 @@ class MeshDrawer
 		// [TO-DO] Now that we have a texture, it might be a good idea to set
 		// some uniform parameter(s) of the fragment shader, so that it uses the texture.
 		gl.useProgram(this.prog);
-		gl.uniform1i(this.texPos, 0);
+		gl.uniform1i(this.textureLocation, 0);
 
 		this.showTexture(true);
 	}
@@ -185,7 +199,7 @@ class MeshDrawer
 	{
 		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify if it should use the texture.
 		gl.useProgram(this.prog)
-		gl.uniform1i(this.showTexPos, show ? 1 : 0);
+		gl.uniform1i(this.showTexLocation, show ? 1 : 0);
 	}
 	
 	// This method is called to set the incoming light direction
