@@ -52,7 +52,7 @@ const meshVS = `
 			gl_Position = u_matrixMVP * vec4(a_position, 1);
 		}
 		v_textureCoordinates = a_textureCoordinates;
-		v_normal =  a_normal;
+		v_normal = u_matrixNormal * a_normal;
 	}
 `
 
