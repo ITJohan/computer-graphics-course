@@ -43,6 +43,7 @@ const meshVS = `
 
 	varying vec2 v_textureCoordinates;
 	varying vec3 v_normal;
+	varying vec4 v_position;
 
 	void main()
 	{
@@ -53,6 +54,7 @@ const meshVS = `
 		}
 		v_textureCoordinates = a_textureCoordinates;
 		v_normal = u_matrixNormal * a_normal;
+		v_position = u_matrixMV * vec4(a_position, 1.0);
 	}
 `
 
@@ -66,14 +68,22 @@ const meshFS = `
 
 	varying vec2 v_textureCoordinates;
 	varying vec3 v_normal;
+	varying vec4 v_position;
 
 	void main()
 	{
 		vec3 normal = normalize(v_normal);
 		vec4 diffuseCoefficient = u_showTex ? texture2D(u_texture, v_textureCoordinates) : vec4(1.0, 1.0, 1.0, 1.0);
+		vec3 specularCoefficient = vec3(1.0, 1.0, 1.0);
 
-		gl_FragColor = diffuseCoefficient;
-		gl_FragColor.rgb *= dot(normal, -1.0 * u_lightDirection);
+		vec3 lightIntensity = vec3(1.0, 1.0, 1.0);
+		vec3 cameraDirection = -1.0 * vec3(v_position);
+		vec3 blinnDirection = normalize(u_lightDirection + cameraDirection);
+
+		vec3 diffuseModel = lightIntensity * diffuseCoefficient.rgb * dot(u_lightDirection, normal);
+		vec3 specularModel = lightIntensity * specularCoefficient * pow(dot(normal, blinnDirection), u_shininess); 
+
+		gl_FragColor = vec4(diffuseModel + specularModel, 1.0);
 	}
 `
 
