@@ -77,12 +77,13 @@ const meshFS = `
 		vec3 specularCoefficient = vec3(1.0, 1.0, 1.0);
 
 		vec3 lightIntensity = vec3(1.0, 1.0, 1.0);
-		vec3 ambientLightIntensity = vec3(0.3, 0.3, 0.3);
+		vec3 ambientLightIntensity = vec3(0.1, 0.1, 0.1);
 		vec3 cameraDirection = -1.0 * vec3(v_position);
-		vec3 blinnDirection = normalize(u_lightDirection + cameraDirection);
+		// vec3 blinnDirection = normalize(u_lightDirection + cameraDirection);
+		vec3 blinnDirection = 2.0 * normal * dot(u_lightDirection, normal) - u_lightDirection;
 
-		vec3 diffuseModel = lightIntensity * vec3(diffuseCoefficient) * dot(u_lightDirection, normal);
-		vec3 specularModel = lightIntensity * specularCoefficient * pow(dot(normal, blinnDirection), u_shininess); 
+		vec3 diffuseModel = lightIntensity * vec3(diffuseCoefficient) * max(0.0, dot(u_lightDirection, normal));
+		vec3 specularModel = lightIntensity * specularCoefficient * pow(max(0.0, dot(normal, blinnDirection)), u_shininess); 
 		vec3 ambientModel = ambientLightIntensity * vec3(diffuseCoefficient);
 
 		gl_FragColor = vec4(diffuseModel + specularModel + ambientModel, 1.0);
