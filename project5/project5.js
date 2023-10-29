@@ -61,6 +61,7 @@ const meshFS = `
 
 	uniform sampler2D u_texture;
 	uniform bool u_showTex;
+	uniform vec3 u_lightDirection;
 
 	varying vec2 v_textureCoordinates;
 	varying vec3 v_normal;
@@ -68,11 +69,10 @@ const meshFS = `
 	void main()
 	{
 		vec3 normal = normalize(v_normal);
-		vec3 lightDirection = normalize(vec3(1.0, 1.0, 0.0));
 		vec4 diffuseCoefficient = u_showTex ? texture2D(u_texture, v_textureCoordinates) : vec4(1.0, 1.0, 1.0, 1.0);
 
 		gl_FragColor = diffuseCoefficient;
-		gl_FragColor.rgb *= dot(normal, lightDirection);
+		gl_FragColor.rgb *= dot(normal, -1.0 * u_lightDirection);
 	}
 `
 
@@ -90,6 +90,7 @@ class MeshDrawer
 		this.swapLocation = gl.getUniformLocation(this.prog, 'u_swap')
 		this.showTexLocation = gl.getUniformLocation(this.prog, 'u_showTex')
 		this.textureLocation = gl.getUniformLocation(this.prog, 'u_texture')
+		this.lightDirectionLocation = gl.getUniformLocation(this.prog, 'u_lightDirection');
 
 		this.positionLocation = gl.getAttribLocation(this.prog, 'a_position');
 		this.textureCoordinatesLocation = gl.getAttribLocation(this.prog, 'a_textureCoordinates');
@@ -206,6 +207,8 @@ class MeshDrawer
 	setLightDir( x, y, z )
 	{
 		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify the light direction.
+		gl.useProgram(this.prog);
+		gl.uniform3f(this.lightDirectionLocation, x, y, z);
 	}
 	
 	// This method is called to set the shininess of the material
