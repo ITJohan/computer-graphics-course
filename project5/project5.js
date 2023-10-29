@@ -62,6 +62,7 @@ const meshFS = `
 	uniform sampler2D u_texture;
 	uniform bool u_showTex;
 	uniform vec3 u_lightDirection;
+	uniform float u_shininess;
 
 	varying vec2 v_textureCoordinates;
 	varying vec3 v_normal;
@@ -91,6 +92,7 @@ class MeshDrawer
 		this.showTexLocation = gl.getUniformLocation(this.prog, 'u_showTex')
 		this.textureLocation = gl.getUniformLocation(this.prog, 'u_texture')
 		this.lightDirectionLocation = gl.getUniformLocation(this.prog, 'u_lightDirection');
+		this.shininessLocation = gl.getUniformLocation(this.prog, 'u_shininess');
 
 		this.positionLocation = gl.getAttribLocation(this.prog, 'a_position');
 		this.textureCoordinatesLocation = gl.getAttribLocation(this.prog, 'a_textureCoordinates');
@@ -215,5 +217,7 @@ class MeshDrawer
 	setShininess( shininess )
 	{
 		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify the shininess.
+		gl.useProgram(this.prog);
+		gl.uniform1f(this.shininessLocation, shininess);
 	}
 }
