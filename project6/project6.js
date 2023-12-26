@@ -68,9 +68,13 @@ bool IntersectRay( inout HitInfo hit, Ray ray )
 			foundHit = true;
 			float t = (-b - sqrt(delta)) / (2.0 * a);
 			vec3 x = ray.pos + t * ray.dir;
-			hit.position = x;
-			hit.normal = x - sphere.center;
-			hit.mtl = sphere.mtl;
+
+			if (t > 0.0 && t < hit.t) {
+				hit.t = t;
+				hit.position = x;
+				hit.normal = x - sphere.center;
+				hit.mtl = sphere.mtl;
+			}
 		}
 	}
 	return foundHit;
