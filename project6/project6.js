@@ -41,8 +41,14 @@ vec3 Shade( Material mtl, vec3 position, vec3 normal, vec3 view )
 	vec3 color = vec3(0,0,0);
 	for ( int i=0; i<NUM_LIGHTS; ++i ) {
 		// TO-DO: Check for shadows
+
 		// TO-DO: If not shadowed, perform shading using the Blinn model
-		color += mtl.k_d * lights[i].intensity;	// change this line
+		vec3 lightDirection = normalize(lights[i].position - position);
+		vec3 blinnDirection = normalize(lightDirection + view);
+		vec3 diffusionPart = lights[i].intensity * max(0.0, dot(lightDirection, normal)) * mtl.k_d;
+		vec3 specularPart = lights[i].intensity * pow(max(0.0, dot(normal, blinnDirection)), mtl.n);
+		vec3 ambientPart = mtl.k_d * lights[i].intensity;
+		color += diffusionPart + specularPart + ambientPart;	// change this line
 	}
 	return color;
 }
@@ -69,10 +75,10 @@ bool IntersectRay( inout HitInfo hit, Ray ray )
 			float t = (-b - sqrt(delta)) / (2.0 * a);
 			vec3 x = ray.pos + t * ray.dir;
 
-			if (t > 0.0 && t < hit.t) {
+			if (t >= 0.0 && t < hit.t) {
 				hit.t = t;
 				hit.position = x;
-				hit.normal = x - sphere.center;
+				hit.normal = normalize(x - sphere.center);
 				hit.mtl = sphere.mtl;
 			}
 		}
