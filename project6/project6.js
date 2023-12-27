@@ -39,16 +39,38 @@ bool IntersectRay( inout HitInfo hit, Ray ray );
 vec3 Shade( Material mtl, vec3 position, vec3 normal, vec3 view )
 {
 	vec3 color = vec3(0,0,0);
+	
+	
 	for ( int i=0; i<NUM_LIGHTS; ++i ) {
-		// TO-DO: Check for shadows
-
-		// TO-DO: If not shadowed, perform shading using the Blinn model
+		bool foundHit = false;
 		vec3 lightDirection = normalize(lights[i].position - position);
-		vec3 blinnDirection = normalize(lightDirection + view);
-		vec3 diffusionPart = lights[i].intensity * max(0.0, dot(lightDirection, normal)) * mtl.k_d;
-		vec3 specularPart = lights[i].intensity * pow(max(0.0, dot(normal, blinnDirection)), mtl.n);
-		vec3 ambientPart = mtl.k_d * lights[i].intensity;
-		color += diffusionPart + specularPart + ambientPart;	// change this line
+		
+		// Check for shadows
+		for ( int j=0; j<NUM_SPHERES; ++j ) {
+			Sphere sphere = spheres[j];
+			float a = dot(lightDirection, lightDirection);
+			float b = dot(2.0 * lightDirection, position - sphere.center);
+			float c = dot(position - sphere.center, position - sphere.center) - pow(sphere.radius, 2.0);
+			float delta = pow(b, 2.0) - 4.0 * a * c;
+
+			if (delta >= 0.0) {
+				float t = (-b - sqrt(delta)) / (2.0 * a);
+				float bias = 0.001;
+	
+				if (t >= bias) {
+					foundHit = true;
+				}
+			}
+		}
+
+		// If not shadowed, perform shading using the Blinn model
+		if (!foundHit) {
+			vec3 blinnDirection = normalize(lightDirection + view);
+			vec3 specularPart = lights[i].intensity * pow(max(0.0, dot(normal, blinnDirection)), mtl.n);
+			vec3 diffusionPart = lights[i].intensity * max(0.0, dot(lightDirection, normal)) * mtl.k_d;
+			vec3 ambientPart = mtl.k_d * vec3(0.2, 0.2, 0.2);
+			color += diffusionPart + specularPart + ambientPart;
+		}
 	}
 	return color;
 }
@@ -62,14 +84,14 @@ bool IntersectRay( inout HitInfo hit, Ray ray )
 	hit.t = 1e30;
 	bool foundHit = false;
 	for ( int i=0; i<NUM_SPHERES; ++i ) {
-		// TO-DO: Test for ray-sphere intersection
+		// Test for ray-sphere intersection
 		Sphere sphere = spheres[i];
 		float a = dot(ray.dir, ray.dir);
 		float b = dot(2.0 * ray.dir, ray.pos - sphere.center);
 		float c = dot(ray.pos - sphere.center, ray.pos - sphere.center) - pow(sphere.radius, 2.0);
 		float delta = pow(b, 2.0) - 4.0 * a * c;
 
-		// TO-DO: If intersection is found, update the given HitInfo
+		// If intersection is found, update the given HitInfo
 		if (delta >= 0.0) {
 			foundHit = true;
 			float t = (-b - sqrt(delta)) / (2.0 * a);
