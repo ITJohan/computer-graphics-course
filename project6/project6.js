@@ -40,7 +40,6 @@ vec3 Shade( Material mtl, vec3 position, vec3 normal, vec3 view )
 {
 	vec3 color = vec3(0,0,0);
 	
-	
 	for ( int i=0; i<NUM_LIGHTS; ++i ) {
 		bool foundHit = false;
 		vec3 lightDirection = normalize(lights[i].position - position);
@@ -66,9 +65,9 @@ vec3 Shade( Material mtl, vec3 position, vec3 normal, vec3 view )
 		// If not shadowed, perform shading using the Blinn model
 		if (!foundHit) {
 			vec3 blinnDirection = normalize(lightDirection + view);
-			vec3 specularPart = lights[i].intensity * pow(max(0.0, dot(normal, blinnDirection)), mtl.n);
+			vec3 specularPart = lights[i].intensity * pow(max(0.0, dot(normal, blinnDirection)), mtl.n) * mtl.k_s;
 			vec3 diffusionPart = lights[i].intensity * max(0.0, dot(lightDirection, normal)) * mtl.k_d;
-			vec3 ambientPart = mtl.k_d * vec3(0.2, 0.2, 0.2);
+			vec3 ambientPart = mtl.k_d * vec3(0.10, 0.1, 0.1);
 			color += diffusionPart + specularPart + ambientPart;
 		}
 	}
@@ -93,11 +92,11 @@ bool IntersectRay( inout HitInfo hit, Ray ray )
 
 		// If intersection is found, update the given HitInfo
 		if (delta >= 0.0) {
-			foundHit = true;
 			float t = (-b - sqrt(delta)) / (2.0 * a);
-			vec3 x = ray.pos + t * ray.dir;
-
-			if (t >= 0.0 && t < hit.t) {
+			
+			if (t > 0.0 && t < hit.t) {
+				foundHit = true;
+				vec3 x = ray.pos + t * ray.dir;
 				hit.t = t;
 				hit.position = x;
 				hit.normal = normalize(x - sphere.center);
@@ -127,10 +126,16 @@ vec4 RayTracer( Ray ray )
 			HitInfo h;	// reflection hit info
 			
 			// TO-DO: Initialize the reflection ray
+			r.pos = hit.position;
+			r.dir = 2.0 * dot(view, hit.normal) * hit.normal - view;
 			
 			if ( IntersectRay( h, r ) ) {
 				// TO-DO: Hit found, so shade the hit point
+				view = normalize(-r.dir);
+				k_s = h.mtl.k_s;
+				clr += k_s * Shade(h.mtl, h.position, h.normal, view);
 				// TO-DO: Update the loop variables for tracing the next reflection ray
+				hit = h;
 			} else {
 				// The refleciton ray did not intersect with anything,
 				// so we are using the environment color
