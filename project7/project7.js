@@ -281,9 +281,29 @@ class MeshDrawer
  * */
 function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, particleMass, gravity, restitution )
 {
-	var forces = Array( positions.length ); // The total for per particle
+	var forces = Array( positions.length ).fill(0); // The total for per particle
 
-	// [TO-DO] Compute the total force of each particle
+	// Compute the total force of each particle
+	springs.forEach((spring) => {
+		const p0position = positions[spring.p0];
+		const p1position = positions[spring.p1];
+		
+		// Spring force
+		const springLength = p1position.sub(p0position).len();
+		const springDirection = p1position.sub(p0position).div(springLength);
+		const springForce = springDirection.mul(stiffness * (springLength - spring.rest));
+		const springForceMagnitude = springForce.len()
+		
+		// Damping force
+		const p0velocity = velocities[spring.p0];
+		const p1velocity = velocities[spring.p1];
+		const lengthChangeSpeed = p1velocity.sub(p0velocity).dot(springDirection);
+		const springDampingForce = springDirection.mul(damping * lengthChangeSpeed); 
+		const springDampingForceMagnitude = springDampingForce.len();
+
+		forces[spring.p0] += springForceMagnitude + springDampingForceMagnitude;
+		forces[spring.p1] += -(springForceMagnitude + springDampingForceMagnitude);
+	})
 	
 	// [TO-DO] Update positions and velocities
 	
