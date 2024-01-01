@@ -234,10 +234,51 @@ class MeshDrawer
 	}
 }
 
+/**
+ * @typedef {Object} Vec3
+ * @prop {number} x
+ * @prop {number} y
+ * @prop {number} z
+ * @prop {(x: number, y: number, z: number) => Vec3} init sets the x, y, and z coordinates to the given values.
+ * @prop {() => Vec3} copy returns a copy of the vector object.
+ * @prop {(v: Vec3) => void} set sets the x, y, and z coordinates to the same values as the given vector v.
+ * @prop {(v: Vec3) => void} inc increments the x, y, and z coordinate values by adding the coordinate values of the given vector v.
+ * @prop {(v: Vec3) => void} dec decrements the x, y, and z coordinate values by subtracting the coordinate values of the given vector v.
+ * @prop {(f: number) => void} scale multiplies the x, y, and z coordinates by the given scalar f.
+ * @prop {(v: Vec3) => Vec3} add add the given vector v to this vector and returns the resulting vector.
+ * @prop {(v: Vec3) => Vec3} sub subtracts the given vector v from this vector and returns the resulting vector.
+ * @prop {(v: Vec3) => number} dot computes the dot product of this vector and the given vector v and returns the resulting scalar.
+ * @prop {(v: Vec3) => Vec3} cross computes the cross product of this vector and the given vector v and returns the resulting vector.
+ * @prop {(f: number) => Vec3} mul multiplies the vector by the given scalar f and returns the result.
+ * @prop {(f: number) => Vec3} div divides the vector by the given scalar f and returns the result.
+ * @prop {() => number} len2 returns the squared length of the vector.
+ * @prop {() => number} len returns the length of the vector.
+ * @prop {() => Vec3} unit returns the unit vector along the direction of this vector.
+ * @prop {() => void} normalize normalizes this vector, turning it into a unit vector.
+ * @prop {(m: number[][]) => {x: number, y: number, z: number, w: number}} trans returns a transposed version of this vector with the given matrix.
+ */
 
-// This function is called for every step of the simulation.
-// Its job is to advance the simulation for the given time step duration dt.
-// It updates the given positions and velocities.
+/**
+ * @typedef {Object} Spring
+ * @prop {number} p0
+ * @prop {number} p1
+ * @prop {number} rest
+ */
+
+/**
+ * This function is called for every step of the simulation.
+ * Its job is to advance the simulation for the given time step duration dt.
+ * It updates the given positions and velocities.
+ * @param {number} dt time step size
+ * @param {Vec3[]} positions
+ * @param {Vec3[]} velocities
+ * @param {Spring[]} springs
+ * @param {number} stiffness
+ * @param {number} damping
+ * @param {number} particleMass
+ * @param {Vec3} gravity
+ * @param {number} restitution the restitution coefficient for collisions with the box walls.
+ * */
 function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, particleMass, gravity, restitution )
 {
 	var forces = Array( positions.length ); // The total for per particle
