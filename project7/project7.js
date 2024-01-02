@@ -314,7 +314,19 @@ function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, pa
 		positions[index] = nextPosition;
 	})
 	
-	// [TO-DO] Handle collisions
+  // Handle collisions
+	positions.forEach((position, index) => {
+	  const min = -1;
+	  const max = 1;
 	
+	  ['x', 'y', 'z'].forEach((axis) => {
+		  if (position[axis] < min || position[axis] > max) {
+			  velocities[index][axis] *= -restitution;
+			  const limit = position[axis] < min ? min : max;
+			  const h = position[axis] - limit;
+			  const hPrime = restitution * h;
+			  positions[index][axis] = limit - hPrime;
+		  }});
+  });
 }
 
